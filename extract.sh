@@ -17,3 +17,4 @@ cd dumped
 python3 ../helpers.py ../${IMG}
 gzip -Nd *.gz
 for file in *.jffs2; do dump_jffs ${file}; done
+# patch 0x3cccc2 0x63c
