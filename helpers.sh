@@ -2,6 +2,22 @@
 
 umount /dev/mtdblock0 || true
 
+slurp_jffs () {
+	echo old crc: $(crc32 ${1})
+	sz=$(wc -c < ${1})
+	rm ${1}
+	mkfs.jffs2 --root=${1%.jffs2} --output=${1} eraseblock=${erase_size} --pad ${sz}
+	echo new crc: $(crc32 ${1})
+}
+
+re_gzip() {
+	orig_address=${1%.gz}
+	gzip -lNv ${1} | tail -n-1 | awk '{print $2 " " $9}' | {
+		read orig_crc orig_name
+		echo packing 
+	}
+}
+
 dump_jffs () {
 	outdir=${1%.jffs2}
 	# load kernel modules for jffs2 system
