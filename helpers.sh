@@ -11,11 +11,13 @@ slurp_jffs () {
 }
 
 re_gzip() {
-	orig_address=${1%.gz}
-	gzip -lNv ${1} | tail -n-1 | awk '{print $2 " " $9}' | {
-		read orig_crc orig_name
-		echo packing 
-	}
+	# skim the gzip header for original filename
+	orig_name=$(gzip -lNq ${1} | awk '{print $4}')
+	# recompress the gzips
+	gzip --best -kN ${orig_name}
+	# gzip will output [fname].gz but we want to overwrite the original
+	# so it gets packed by the python script
+	mv ${orig_name}.gz ${1}
 }
 
 dump_jffs () {

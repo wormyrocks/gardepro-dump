@@ -1,6 +1,6 @@
+import sys,csv
+
 command = sys.argv[1]
-image_file = sys.argv[2]
-locations_file = sys.argv[3]
 
 def splitfile(f, name, offset, writelen):
     outfile = open(name, "wb")
@@ -16,7 +16,9 @@ def patch_inplace(f, offset, obj):
     return flen
 
 def do_thing(thing):
-    infile = open(image_file, "rb" if (thing == 'unpack') else "wb")
+    image_file = sys.argv[2]
+    locations_file = sys.argv[3]
+    infile = open(image_file, "rb" if (thing == 'unpack') else "r+b")
     with open(locations_file) as csvfile:
         reader = csv.reader(csvfile)
         for entry in reader:
@@ -30,6 +32,7 @@ def do_thing(thing):
                 print("packing: %s" % (name))
                 packfile = open(name, "rb")
                 flen = patch_inplace(infile, offset, packfile.read())
+                if lenloc:
                     lenbytes=flen.to_bytes(byteorder="little", signed=False, length=4)
                     patch_inplace(infile, int(lenloc,0), lenbytes)
                 if crcloc:
@@ -40,16 +43,16 @@ def do_thing(thing):
                         patch_inplace(infile, int(crcloc,0), crc_footer)
                     else:
                         print("not implemented")
-                # pad out file with 0xff's
-                for i in range (max(0, length - flen)):
-                    infile.write(b'\xff')
                 packfile.close()
-
     infile.close()
 
+if command == 'patchlogo':
+    infile=open('sample2.bin', 'rb+')
+    infile.seek(0x3cccc2)
+    infile.write(bytes(1596))
+    infile.close()
 
 if command == 'unpack':
     do_thing('unpack')
 elif command == 'pack':
     do_thing('pack')
-
