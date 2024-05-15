@@ -34,8 +34,8 @@ pack() {
 			python3 ../helpers.py pack ../${IMG}.repack ../locations.csv
 			# recalculate crc32 in header
 			printf '\x00\x00\x00\x00' | dd of=../${IMG}.repack bs=1 seek=$UBOOT_HDR_CRC_OFFSET conv=notrunc
-			crc32 <(cat ../${IMG}.repack | head -c64 ) | xxd -r -p | dd of=../${IMG}.repack bs=1 seek=$UBOOT_HDR_CRC_OFFSET conv=notrunc
 			crc32 <(cat ../${IMG}.repack | tail -c+66) | xxd -r -p | dd of=../${IMG}.repack bs=1 seek=$UBOOT_DATA_CRC_OFFSET conv=notrunc
+			crc32 <(cat ../${IMG}.repack | head -c64 ) | xxd -r -p | dd of=../${IMG}.repack bs=1 seek=$UBOOT_HDR_CRC_OFFSET conv=notrunc
 		}
 	} || echo Run \'./extract.sh unpack\' first. 
 }
